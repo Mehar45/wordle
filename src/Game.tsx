@@ -1,26 +1,55 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import words from "./wordsList.json";
 
-const keyBoard = [
+const KEYS = [
   ["q", "w", "e", "r", "t", "y", "u", "i", "o"],
   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  ["z", "x", "c", "v", "b", "n", "m"],
+  ["Enter", "z", "x", "c", "v", "b", "n", "m", "Backspace"],
 ]
 
+const GRID = [
+  ["", "", "", "", ""],
+  ["", "", "", "", ""],
+  ["", "", "", "", ""],
+  ["", "", "", "", ""],
+  ["", "", "", "", ""],
+  ["", "", "", "", ""],
+];
+
 export default function Game() {
-  const [input, setInput] = useState("");
+  const [wordToGuess] = useState(
+    words[Math.floor(Math.random() * words.length)]
+  );
+  const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
 
-  const answers = [
-    ["h", "e", "l", "l", "o"],
-    ["w", "o", "r", "l", "d"],
-    ["b", "r", "e", "a", "k"],
-    ["l", "i", "m", "i", "t"],
-    ["l", "a", "t", "e", "r"],
-    ["p", "e", "a", "c", "e"],
-  ];
+  const addGuessedLetters = (e: string) => {
+    if (e === "Backspace") {
+      guessedLetters.pop();
+      setGuessedLetters([...guessedLetters]);
+      return;
+    }
 
-  const handelInputValue = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setInput((e.target as HTMLButtonElement).textContent!);
+    if (guessedLetters.length >= 4 || e === "Enter") {
+      return;
+    }
+
+    setGuessedLetters([...guessedLetters, e]);
   }
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const key = e.key;
+      if (!key.match(/^[a-z]|Backspace|Enter$/)) return;
+
+      addGuessedLetters(key);
+    }
+
+    document.addEventListener("keyup", handler);
+
+    return () => {
+      document.removeEventListener("keyup", handler);
+    }
+  }, [guessedLetters]);
 
   return (
     <main className="h-screen grid gap-4 place-content-center">
@@ -28,37 +57,39 @@ export default function Game() {
         Start typing
       </h1>
 
+      {/* Grid */}
       <div className="space-y-2">
-        {answers.map((answer, i) =>
+        {GRID.map((g, i) =>
           <ul
+            // Yes, I am using index as key because each element is static
             key={i}
             className="flex justify-center gap-2 text-3xl font-bold uppercase"
             role="group"
             aria-label={`Row ${i + 1}`}
           >
-            {answer.map((a, i) =>
-              // Yes, I am using index as key because each element is static
+            {g.map((_, i) =>
               <li
                 key={i}
                 className="flex items-center justify-center border-2 border-gray-400 w-[52px] h-[52px]"
               >
-                {input}
+                {guessedLetters}
               </li>
             )}
           </ul>
         )}
       </div>
 
+      {/* Keyboard */}
       <div role="group" className="mt-4 space-y-2">
-        {keyBoard.map((key, i) =>
+        {KEYS.map((key, i) =>
           <div key={i} className="flex gap-2 font-bold text-xl">
             {key.map(k =>
               <button
                 key={k}
-                className="w-11 h-14 bg-gray-300 uppercase rounded-md"
-                onClick={handelInputValue}
+                className={`${k === "Enter" ? 'text-sm px-2 font-semibold' : ""} min-w-[2.75rem] h-14 bg-gray-300 uppercase rounded-md`}
+                onClick={() => addGuessedLetters(k)}
               >
-                {k}
+                {k === "Backspace" ? "⌫" : k}
               </button>
             )}
           </div>

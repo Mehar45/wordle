@@ -17,15 +17,15 @@ export default function Home({ setIsPlaying }: HomeProps) {
         <h2 className='text-3xl mb-2'>
           Get 6 chances to guess a <br /> 5-letter  word.
         </h2>
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between gap-4 text-md font-semibold">
           <button
-            className='flex-1 border-black border-[1px] py-2 text-md rounded-full'
+            className='flex-1 border-black border-[1px] py-2 rounded-full'
             onClick={() => dialogRef.current?.showModal()}
           >
             How to play
           </button>
           <button
-            className='flex-1 bg-black text-white py-2 text-md rounded-full'
+            className='flex-1 bg-black text-white py-2 rounded-full'
             onClick={() => setIsPlaying(true)}
           >
             Play
