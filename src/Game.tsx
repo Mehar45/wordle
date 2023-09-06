@@ -1,39 +1,39 @@
 import { useEffect, useState } from "react";
 import words from "./wordsList.json";
-
-const KEYS = [
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o"],
-  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  ["Enter", "z", "x", "c", "v", "b", "n", "m", "Backspace"],
-]
-
-const GRID = [
-  ["", "", "", "", ""],
-  ["", "", "", "", ""],
-  ["", "", "", "", ""],
-  ["", "", "", "", ""],
-  ["", "", "", "", ""],
-  ["", "", "", "", ""],
-];
+import Keyboard from "./Keyboard";
 
 export default function Game() {
   const [wordToGuess] = useState(
     words[Math.floor(Math.random() * words.length)]
   );
-  const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
+  const [currentGuess, setCurrentGuess] = useState("");
+  const [guessedWords, setGuessedWords] = useState<string[]>(Array(6).fill(null));
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const addGuessedLetters = (e: string) => {
+  const addGuessedWords = (e: string) => {
     if (e === "Backspace") {
-      guessedLetters.pop();
-      setGuessedLetters([...guessedLetters]);
+      setCurrentGuess(currentGuess.slice(0, -1));
       return;
     }
 
-    if (guessedLetters.length >= 4 || e === "Enter") {
+    if (e === "Enter" && currentGuess.length > 4) {
+      setSelectedIndex(i => ++i);
+      setCurrentGuess("");
+      setGuessedWords(guess => guess.map((g, i) => {
+        if (i === selectedIndex) {
+          return currentGuess;
+        } else {
+          return g;
+        }
+      }))
       return;
     }
 
-    setGuessedLetters([...guessedLetters, e]);
+    if (currentGuess.length > 4 || e === "Enter") {
+      return;
+    }
+
+    setCurrentGuess(currentGuess + e);
   }
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function Game() {
       const key = e.key;
       if (!key.match(/^[a-z]|Backspace|Enter$/)) return;
 
-      addGuessedLetters(key);
+      addGuessedWords(key);
     }
 
     document.addEventListener("keyup", handler);
@@ -49,7 +49,7 @@ export default function Game() {
     return () => {
       document.removeEventListener("keyup", handler);
     }
-  }, [guessedLetters]);
+  }, [guessedWords, currentGuess]);
 
   return (
     <main className="h-screen grid gap-4 place-content-center">
@@ -59,42 +59,39 @@ export default function Game() {
 
       {/* Grid */}
       <div className="space-y-2">
-        {GRID.map((g, i) =>
-          <ul
-            // Yes, I am using index as key because each element is static
-            key={i}
-            className="flex justify-center gap-2 text-3xl font-bold uppercase"
-            role="group"
-            aria-label={`Row ${i + 1}`}
-          >
-            {g.map((_, i) =>
-              <li
-                key={i}
-                className="flex items-center justify-center border-2 border-gray-400 w-[52px] h-[52px]"
-              >
-                {guessedLetters}
-              </li>
-            )}
-          </ul>
-        )}
+        {guessedWords.map((word, i) => {
+          const isCurrentGuess = i === selectedIndex;
+
+          return (
+            <ul
+              // Yes, I am using index as key because each element is static
+              key={i}
+              className="flex justify-center gap-2 text-3xl font-bold uppercase"
+              role="group"
+              aria-label={`Row ${i + 1}`}
+            >
+              <Col guess={isCurrentGuess ? currentGuess : word ?? ""} noOfCols={5} />
+            </ul>
+          )
+        })}
       </div>
 
-      {/* Keyboard */}
-      <div role="group" className="mt-4 space-y-2">
-        {KEYS.map((key, i) =>
-          <div key={i} className="flex gap-2 font-bold text-xl">
-            {key.map(k =>
-              <button
-                key={k}
-                className={`${k === "Enter" ? 'text-sm px-2 font-semibold' : ""} min-w-[2.75rem] h-14 bg-gray-300 uppercase rounded-md`}
-                onClick={() => addGuessedLetters(k)}
-              >
-                {k === "Backspace" ? "⌫" : k}
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+      <Keyboard addGuessedWords={addGuessedWords} />
     </main>
   );
+}
+
+function Col({ guess, noOfCols }: { guess: string; noOfCols: number }) {
+  const boxes = [];
+
+  for (let i = 0; i < noOfCols; i++) {
+    const char = guess[i];
+    boxes.push(
+      <li key={i} className="flex items-center justify-center border-2 border-gray-400 w-[52px] h-[52px]">
+        {char}
+      </li>
+    );
+  }
+
+  return boxes;
 }
