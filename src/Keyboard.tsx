@@ -3,7 +3,7 @@ type KeyboardProps = {
 }
 
 const KEYS = [
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o"],
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
   ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
   ["Enter", "z", "x", "c", "v", "b", "n", "m", "Backspace"],
 ];
@@ -12,7 +12,7 @@ export default function Keyboard({ addGuessedWords }: KeyboardProps) {
   return (
     <div role="group" className="mt-4 space-y-2">
       {KEYS.map((key, i) =>
-        <div key={i} className="flex gap-2 font-bold text-xl">
+        <div key={i} className="flex justify-center gap-2 font-bold text-xl">
           {key.map(k =>
             <button
               key={k}

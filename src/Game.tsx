@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import words from "./wordsList.json";
+import Col from "./Col"
 import Keyboard from "./Keyboard";
 
 export default function Game() {
@@ -9,6 +10,7 @@ export default function Game() {
   const [currentGuess, setCurrentGuess] = useState("");
   const [guessedWords, setGuessedWords] = useState<string[]>(Array(6).fill(null));
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const isLoser = selectedIndex > 5;
 
   const addGuessedWords = (e: string) => {
     if (e === "Backspace") {
@@ -16,16 +18,16 @@ export default function Game() {
       return;
     }
 
+    if (wordToGuess === guessedWords[selectedIndex - 1]) return;
+
     if (e === "Enter" && currentGuess.length > 4) {
+      if (selectedIndex > 5) return;
+
       setSelectedIndex(i => ++i);
       setCurrentGuess("");
-      setGuessedWords(guess => guess.map((g, i) => {
-        if (i === selectedIndex) {
-          return currentGuess;
-        } else {
-          return g;
-        }
-      }))
+      setGuessedWords(guessedWords.map((guess, i) =>
+        i === selectedIndex ? currentGuess : guess
+      ));
       return;
     }
 
@@ -49,10 +51,16 @@ export default function Game() {
     return () => {
       document.removeEventListener("keyup", handler);
     }
-  }, [guessedWords, currentGuess]);
+  }, [guessedWords, currentGuess, wordToGuess]);
 
   return (
     <main className="h-screen grid gap-4 place-content-center">
+      {isLoser && (
+        <div className="text-red-600 text-center text-2xl font-medium">
+          You lost! Correct word was: {wordToGuess}
+        </div>
+      )}
+
       <h1 className="text-2xl font-bold uppercase text-center">
         Start typing
       </h1>
@@ -70,7 +78,12 @@ export default function Game() {
               role="group"
               aria-label={`Row ${i + 1}`}
             >
-              <Col guess={isCurrentGuess ? currentGuess : word ?? ""} noOfCols={5} />
+              <Col
+                noOfCols={5}
+                wordToGuess={wordToGuess}
+                guess={isCurrentGuess ? currentGuess : word ?? ""}
+                isCorrect={currentGuess != null && word != null}
+              />
             </ul>
           )
         })}
@@ -79,19 +92,4 @@ export default function Game() {
       <Keyboard addGuessedWords={addGuessedWords} />
     </main>
   );
-}
-
-function Col({ guess, noOfCols }: { guess: string; noOfCols: number }) {
-  const boxes = [];
-
-  for (let i = 0; i < noOfCols; i++) {
-    const char = guess[i];
-    boxes.push(
-      <li key={i} className="flex items-center justify-center border-2 border-gray-400 w-[52px] h-[52px]">
-        {char}
-      </li>
-    );
-  }
-
-  return boxes;
 }
