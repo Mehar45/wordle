@@ -12,11 +12,11 @@ export default function Keyboard({ addGuessedWords }: KeyboardProps) {
   return (
     <div role="group" className="mt-4 space-y-2">
       {KEYS.map((key, i) =>
-        <div key={i} className="flex justify-center gap-2 font-bold text-xl">
+        <div key={i} className="flex justify-center gap-1 sm:gap-2 font-bold text-xl">
           {key.map(k =>
             <button
               key={k}
-              className={`${k === "Enter" ? 'text-sm px-2 font-semibold' : ""} min-w-[2.75rem] h-14 bg-gray-300 uppercase rounded-md`}
+              className={`${k === "Enter" ? 'text-sm px-2 font-semibold' : ""} min-w-[2rem] sm:min-w-[2.75rem] h-[2.75rem] sm:h-14 bg-gray-300 uppercase rounded-md`}
               onClick={() => addGuessedWords(k)}
             >
               {k === "Backspace" ? "⌫" : k}

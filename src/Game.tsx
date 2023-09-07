@@ -55,7 +55,7 @@ export default function Game() {
 
   return (
     <main className="h-screen grid gap-4 place-content-center">
-      {isLoser && (
+      {isLoser && wordToGuess !== guessedWords[selectedIndex - 1] && (
         <div className="text-red-600 text-center text-2xl font-medium">
           You lost! Correct word was: {wordToGuess}
         </div>
